@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DAQ</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Choose Protocols</h1>
+
+      <div class="btn-container">
+        <button id="mqtt_button" onclick="showForm('mqtt_form')">MQTT</button>
+        <button id="rest_button" onclick="showForm('rest_form')">REST</button>
+        <button id="bacnet_button" onclick="showForm('bacnet_form')">
+          BACNET
+        </button>
+        <button id="opac_button"  onclick="showForm('opac_form')"">OPAC</button>
+        <button id="iec_button">IEC</button>
+      </div>
+
+      <form id="mqtt_form" action="/configure_mqtt" method="POST">
+        <label for="mqtt_ip">MQTT Broker IP:</label>
+        <input type="text" name="mqtt_ip" id="mqtt_ip" required />
+        <label for="mqtt_port">MQTT Broker Port:</label>
+        <input type="number" name="mqtt_port" id="mqtt_port" required />
+        <input type="submit" value="Configure MQTT" />
+      </form>
+
+      <form id="rest_form" action="/configure_rest" method="POST">
+        <label for="rest_url">REST API URL:</label>
+        <input type="text" name="rest_url" id="rest_url" required />
+        <label for="rest_method">HTTP Method:</label>
+        <select name="rest_method" id="rest_method" required>
+          <option value="GET">GET</option>
+          <option value="POST">POST</option>
+          <option value="PUT">PUT</option>
+          <option value="DELETE">DELETE</option>
+        </select>
+        <input type="submit" value="Configure REST" />
+      </form>
+
+      <form id="bacnet_form" action="/configure_bacnet" method="POST">
+        <label for="ip">BACnet IP:</label>
+        <input type="text" name="ip" id="ip" required />
+        <label for="port">BACnet Port:</label>
+        <input type="number" name="port" id="port" required />
+        <input type="submit" value="Configure BACnet" />
+      </form>
+
+      <form id="opac_form" action="/configure_opac" method="POST">
+        <label for="opac_server">OPAC Server:</label>
+        <input type="text" name="opac_server" id="opac_server" required />
+        <label for="opac_username">Username:</label>
+        <input type="text" name="opac_username" id="opac_username" required />
+        <label for="opac_password">Password:</label>
+        <input
+          type="password"
+          name="opac_password"
+          id="opac_password"
+          required
+        />
+        <input type="submit" value="Configure OPAC" />
+      </form>
+
+      <div id="bacnet_logs"></div>
+    </div>
+
+    <script>
+      function showMessage(message) {
+        alert(message);
+      }
+
+      const bacnetButton = document.getElementById("bacnet_button");
+      const bacnetForm = document.getElementById("bacnet_form");
+
+      bacnetButton.addEventListener("click", () => {
+        bacnetForm.style.display = "block";
+      });
+
+      bacnetForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        fetch("/configure_bacnet", {
+          method: "POST",
+          body: new FormData(bacnetForm),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            showMessage(data.message);
+          })
+          .catch((error) => {
+            showMessage("Error configuring BACnet: " + error);
+          });
+      });
+
+      function showForm(formId) {
+        document.getElementById("mqtt_form").style.display = "none";
+        document.getElementById("bacnet_form").style.display = "none";
+        document.getElementById("rest_form").style.display = "none";
+        document.getElementById("opac_form").style.display = "none";
+        document.getElementById(formId).style.display = "block";
+      }
+    </script>
+  </body>
+</html>
